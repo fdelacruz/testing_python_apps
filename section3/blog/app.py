@@ -27,7 +27,7 @@ def menu():
         elif selection == 'r':
             ask_read_blog()
         elif selection == 'p':
-            ask_create_blog()
+            ask_create_post()
         selection = input(MENU_PROMPT)
 
 
@@ -59,4 +59,8 @@ def print_post(post):
 
 
 def ask_create_post():
-    pass
+    blog_title = input('Enter the blog title you want to write a post in: ')
+    title = input('Enter your post title: ')
+    content = input('Enter your post content: ')
+
+    blogs[blog_title].create_post(title, content)
