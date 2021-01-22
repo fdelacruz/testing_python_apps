@@ -6,6 +6,18 @@ import json
 
 
 class TestItem(BaseTest):
+    def setUp(self):
+        super(TestItem, self).setUp()
+        with self.app() as client:
+            with self.app_context():
+                UserModel('test', '1234').save_to_db()
+                auth_request = client.post('/auth', data=json.dumps({
+                    'username': 'test',
+                    'password': '1234'
+                }), headers={'Content-Type': 'application/json'})
+                auth_token = json.loads(auth_request.data)['access_token']
+                self.access_token = f'JWT {auth_token}'
+
     def test_get_item_no_auth(self):
         with self.app() as client:
             with self.app_context():
@@ -15,16 +27,8 @@ class TestItem(BaseTest):
 
     def test_get_item_not_found(self):
         with self.app() as client:
-            with self.app_context():
-                UserModel('test', '1234').save_to_db()
-                auth_request = client.post('/auth',
-                                           data=json.dumps({'username': 'test', 'password': '1234'}),
-                                           headers={'Content-Type': 'application/json'})
-                auth_token = json.loads(auth_request.data)['access_token']
-                header = {'Authorization': 'JWT ' + auth_token}
-
-                response = client.get('/item/test', headers=header)
-                self.assertEqual(response.status_code, 404)
+            response = client.get('/item/test', headers={'Authorization': self.access_token})
+            self.assertEqual(response.status_code, 404)
 
     def test_get_item(self):
         pass
